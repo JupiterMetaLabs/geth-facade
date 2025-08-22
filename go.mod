@@ -1,4 +1,4 @@
-module jmdt-geth-facade
+module geth-facade
 
 go 1.22.6
 

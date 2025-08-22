@@ -28,7 +28,7 @@ func NewMemoryBackend(chainID *big.Int) Backend {
 
 func (m *mem) ChainID(ctx context.Context) (*big.Int, error) { return m.chainID, nil }
 func (m *mem) ClientVersion(ctx context.Context) (string, error) {
-	return "jmdt-geth-facade/0.1 (go)", nil
+	return "geth-facade/0.1 (go)", nil
 }
 func (m *mem) BlockNumber(ctx context.Context) (*big.Int, error) { return new(big.Int).Set(m.num), nil }
 func (m *mem) BlockByNumber(ctx context.Context, num *big.Int, fullTx bool) (*Block, error) {

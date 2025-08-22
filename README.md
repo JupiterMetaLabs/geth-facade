@@ -1,4 +1,4 @@
-## jmdt-geth-facade
+## geth-facade
 
 A minimal, production-ready JSON-RPC/WebSocket façade that mirrors common geth endpoints (eth_*, net_*, web3_*). Wire the `backend.Backend` interface to your own node(s) to provide real data.
 

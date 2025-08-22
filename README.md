@@ -18,17 +18,17 @@ Note: The in-repo `backend/memory.go` is a stub for smoke testing. Replace it wi
 cd rpc-facade
 go mod tidy
 # Recommended on macOS (and generally safe everywhere):
-go build -ldflags='-linkmode=external -w -s' -o jmdt-geth-facade .
+go build -ldflags='-linkmode=external -w -s' -o geth-facade .
 ```
 
 ### Run
 The server accepts a chain ID via a CLI flag (decimal or hex).
 ```bash
 # Decimal chain ID
-./jmdt-geth-facade -chainid 11155111
+./geth-facade -chainid 11155111
 
 # Hex chain ID
-./jmdt-geth-facade -chainid 0xaa36a7
+./geth-facade -chainid 0xaa36a7
 ```
 
 - HTTP endpoint: http://localhost:8545

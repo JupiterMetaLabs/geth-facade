@@ -6,8 +6,8 @@ import (
 	"math/big"
 	"strings"
 
-	"jmdt-geth-facade/backend"
-	"jmdt-geth-facade/rpc"
+	"geth-facade/backend"
+	"geth-facade/rpc"
 )
 
 func main() {

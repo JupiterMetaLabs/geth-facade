@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"jmdt-geth-facade/backend"
+	"geth-facade/backend"
 
 	"github.com/gorilla/websocket"
 )

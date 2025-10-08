@@ -4,8 +4,8 @@ import (
 	"log"
 	"math/big"
 
-	jmdtgethfacade "github.com/saishibu/jmdt-geth-facade/pkg/jmdtgethfacade"
-	"github.com/saishibu/jmdt-geth-facade/pkg/memorybackend"
+	jmdtgethfacade "github.com/JupiterMetaLabs/geth-facade/pkg/jmdtgethfacade"
+	"github.com/JupiterMetaLabs/geth-facade/pkg/memorybackend"
 )
 
 func main() {

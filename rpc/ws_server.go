@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/saishibu/jmdt-geth-facade/backend"
+	"github.com/JupiterMetaLabs/geth-facade/backend"
 
 	"github.com/gorilla/websocket"
 )

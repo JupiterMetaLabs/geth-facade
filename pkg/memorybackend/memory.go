@@ -10,7 +10,7 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/saishibu/jmdt-geth-facade/backend"
+	"github.com/JupiterMetaLabs/geth-facade/backend"
 )
 
 type mem struct {

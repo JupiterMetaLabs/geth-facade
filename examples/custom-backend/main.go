@@ -5,8 +5,8 @@ import (
 	"log"
 	"math/big"
 
-	"github.com/saishibu/jmdt-geth-facade/backend"
-	jmdtgethfacade "github.com/saishibu/jmdt-geth-facade/pkg/jmdtgethfacade"
+	"github.com/JupiterMetaLabs/geth-facade/backend"
+	jmdtgethfacade "github.com/JupiterMetaLabs/geth-facade/pkg/jmdtgethfacade"
 )
 
 // CustomBackend implements the backend.Backend interface

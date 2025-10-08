@@ -11,8 +11,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/saishibu/jmdt-geth-facade/backend"
-	"github.com/saishibu/jmdt-geth-facade/rpc"
+	"github.com/JupiterMetaLabs/geth-facade/backend"
+	"github.com/JupiterMetaLabs/geth-facade/rpc"
 )
 
 // Server represents a geth facade server that can serve both HTTP and WebSocket JSON-RPC endpoints.

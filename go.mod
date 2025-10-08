@@ -1,4 +1,4 @@
-module github.com/saishibu/jmdt-geth-facade
+module github.com/JupiterMetaLabs/geth-facade
 
 go 1.22.6
 

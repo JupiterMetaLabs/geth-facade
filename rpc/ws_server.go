@@ -3,11 +3,12 @@ package rpc
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 	"sync"
 	"time"
 
-	"geth-facade/backend"
+	"github.com/saishibu/jmdt-geth-facade/backend"
 
 	"github.com/gorilla/websocket"
 )
@@ -56,8 +57,12 @@ func (s *WSServer) handleWS(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
+		// Log incoming WebSocket message
+		log.Printf("🔌 WS Message: %s", string(data))
+
 		var req Request
 		if err := json.Unmarshal(data, &req); err != nil {
+			log.Printf("❌ WS Parse Error: %v", err)
 			_ = conn.WriteJSON(RespErr(nil, -32700, "Parse error"))
 			continue
 		}
@@ -132,6 +137,7 @@ func (s *WSServer) handleWS(w http.ResponseWriter, r *http.Request) {
 
 		// regular RPC via WS
 		resp, _ := s.h.Handle(ctx, req)
+		log.Printf("📤 WS Response: %s -> %+v", req.Method, resp)
 		_ = conn.WriteJSON(resp)
 	}
 }

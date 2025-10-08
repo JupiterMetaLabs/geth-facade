@@ -6,8 +6,8 @@ import (
 	"math/big"
 	"strings"
 
-	"geth-facade/backend"
-	"geth-facade/rpc"
+	"github.com/saishibu/jmdt-geth-facade/pkg/jmdtgethfacade"
+	"github.com/saishibu/jmdt-geth-facade/pkg/memorybackend"
 )
 
 func main() {
@@ -25,19 +25,22 @@ func main() {
 		chainID.SetString(*chainIDFlag, 10)
 	}
 
-	// TODO: swap memory backend with your real adapter
-	be := backend.NewMemoryBackend(chainID)
+	// Create server configuration with memory backend (for testing/development)
+	config := jmdtgethfacade.Config{
+		Backend:  memorybackend.NewMemoryBackend(chainID),
+		HTTPAddr: *httpAddrFlag,
+		WSAddr:   *wsAddrFlag,
+	}
 
-	h := rpc.NewHandlers(be)
+	// Create and start server
+	server := jmdtgethfacade.NewServer(config)
 
-	go func() {
-		log.Println("HTTP JSON-RPC on", *httpAddrFlag)
-		if err := rpc.NewHTTPServer(h).Serve(*httpAddrFlag); err != nil {
-			log.Fatal(err)
-		}
-	}()
-	log.Println("WS JSON-RPC on", *wsAddrFlag)
-	if err := rpc.NewWSServer(h, be).Serve(*wsAddrFlag); err != nil {
-		log.Fatal(err)
+	log.Printf("Starting JMDT Geth Facade server...")
+	log.Printf("Chain ID: %s", chainID.String())
+	log.Printf("HTTP JSON-RPC on %s", *httpAddrFlag)
+	log.Printf("WebSocket JSON-RPC on %s", *wsAddrFlag)
+
+	if err := server.Start(); err != nil {
+		log.Fatal("Server error:", err)
 	}
 }

@@ -6,8 +6,8 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/JupiterMetaLabs/geth-facade/pkg/jmdtgethfacade"
-	"github.com/JupiterMetaLabs/geth-facade/pkg/memorybackend"
+	"github.com/jupitermetalabs/geth-facade/pkg/jmdtgethfacade"
+	"github.com/jupitermetalabs/geth-facade/pkg/memorybackend"
 )
 
 func main() {

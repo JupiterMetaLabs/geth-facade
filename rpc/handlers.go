@@ -10,7 +10,7 @@ import (
 	"encoding/json"
 	"log"
 
-	"github.com/JupiterMetaLabs/geth-facade/backend"
+	"github.com/jupitermetalabs/geth-facade/backend"
 )
 
 type Handlers struct{ be backend.Backend }

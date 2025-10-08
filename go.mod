@@ -1,4 +1,4 @@
-module github.com/JupiterMetaLabs/geth-facade
+module github.com/jupitermetalabs/geth-facade
 
 go 1.22.6
 

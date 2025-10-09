@@ -18,8 +18,6 @@ A high-performance Ethereum JSON-RPC facade that provides a Geth-compatible API 
 jmdt-geth-facade/
 ├── Types/           # Data structures and type definitions
 ├── Services/        # Business logic and service implementations
-├── Logs/           # Logging configuration and utilities
-├── Utils/          # Utility functions and helpers
 ├── Tests/          # Testing scripts and documentation
 ├── Scripts/        # Deployment scripts and examples
 ├── main.go         # Application entry point
@@ -30,8 +28,6 @@ jmdt-geth-facade/
 
 - **Types/**: Core data structures that mirror Geth's implementation
 - **Services/**: HTTP/WebSocket servers, handlers, and backend implementations
-- **Logs/**: Centralized logging configuration (prepared for future enhancements)
-- **Utils/**: Reusable utility functions for data conversion and validation
 - **Tests/**: Comprehensive testing scripts for all functionality
 - **Scripts/**: Docker configuration and example implementations
 

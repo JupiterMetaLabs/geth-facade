@@ -2,6 +2,8 @@ module github.com/jupitermetalabs/geth-facade
 
 go 1.23.0
 
+// Version v2.0.0 - Restructured codebase with organized folder structure
+
 require github.com/gorilla/websocket v1.5.3
 
 require (

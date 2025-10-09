@@ -3,7 +3,7 @@
 //
 // This package allows you to wire your own backend implementation to provide
 // real blockchain data through a standard Ethereum JSON-RPC interface.
-package jmdtgethfacade
+package Services
 
 import (
 	"context"
@@ -11,14 +11,13 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/jupitermetalabs/geth-facade/backend"
-	"github.com/jupitermetalabs/geth-facade/rpc"
+	"github.com/jupitermetalabs/geth-facade/Types"
 )
 
 // Server represents a geth facade server that can serve both HTTP and WebSocket JSON-RPC endpoints.
 type Server struct {
-	handlers *rpc.Handlers
-	backend  backend.Backend
+	handlers *Handlers
+	backend  Types.Backend
 	httpAddr string
 	wsAddr   string
 }
@@ -26,7 +25,7 @@ type Server struct {
 // Config holds the configuration for the facade server.
 type Config struct {
 	// Backend is the blockchain backend implementation
-	Backend backend.Backend
+	Backend Types.Backend
 	// HTTPAddr is the HTTP server address (e.g., ":8545")
 	HTTPAddr string
 	// WSAddr is the WebSocket server address (e.g., ":8546")
@@ -36,7 +35,7 @@ type Config struct {
 // NewServer creates a new facade server with the given configuration.
 func NewServer(config Config) *Server {
 	return &Server{
-		handlers: rpc.NewHandlers(config.Backend),
+		handlers: NewHandlers(config.Backend),
 		backend:  config.Backend,
 		httpAddr: config.HTTPAddr,
 		wsAddr:   config.WSAddr,
@@ -49,7 +48,7 @@ func (s *Server) Start() error {
 	// Start HTTP server in a goroutine
 	go func() {
 		log.Printf("HTTP JSON-RPC server starting on %s", s.httpAddr)
-		httpServer := rpc.NewHTTPServer(s.handlers)
+		httpServer := NewHTTPServer(s.handlers)
 		if err := httpServer.Serve(s.httpAddr); err != nil {
 			log.Printf("HTTP server error: %v", err)
 		}
@@ -57,31 +56,31 @@ func (s *Server) Start() error {
 
 	// Start WebSocket server (blocking)
 	log.Printf("WebSocket JSON-RPC server starting on %s", s.wsAddr)
-	wsServer := rpc.NewWSServer(s.handlers, s.backend)
+	wsServer := NewWSServer(s.handlers, s.backend)
 	return wsServer.Serve(s.wsAddr)
 }
 
 // StartHTTP starts only the HTTP server.
 func (s *Server) StartHTTP() error {
 	log.Printf("HTTP JSON-RPC server starting on %s", s.httpAddr)
-	httpServer := rpc.NewHTTPServer(s.handlers)
+	httpServer := NewHTTPServer(s.handlers)
 	return httpServer.Serve(s.httpAddr)
 }
 
 // StartWS starts only the WebSocket server.
 func (s *Server) StartWS() error {
 	log.Printf("WebSocket JSON-RPC server starting on %s", s.wsAddr)
-	wsServer := rpc.NewWSServer(s.handlers, s.backend)
+	wsServer := NewWSServer(s.handlers, s.backend)
 	return wsServer.Serve(s.wsAddr)
 }
 
 // GetHandlers returns the RPC handlers for custom server implementations.
-func (s *Server) GetHandlers() *rpc.Handlers {
+func (s *Server) GetHandlers() *Handlers {
 	return s.handlers
 }
 
 // GetBackend returns the backend implementation.
-func (s *Server) GetBackend() backend.Backend {
+func (s *Server) GetBackend() Types.Backend {
 	return s.backend
 }
 
@@ -95,8 +94,8 @@ func DefaultConfig() Config {
 	}
 }
 
-// DefaultConfigWithCustomBackend returns a default configuration with a custom backend.
-func DefaultConfigWithCustomBackend(be backend.Backend) Config {
+// DefaultConfigWithCustomBackend returns a default configuration with a custom Types.
+func DefaultConfigWithCustomBackend(be Types.Backend) Config {
 	return Config{
 		Backend:  be,
 		HTTPAddr: ":8545",
@@ -107,20 +106,21 @@ func DefaultConfigWithCustomBackend(be backend.Backend) Config {
 // QuickStart starts a server with default configuration.
 // Note: You must provide your own backend implementation.
 // For testing, see the examples/memory-backend directory.
-func QuickStart(be backend.Backend) error {
+func QuickStart(be Types.Backend) error {
 	config := DefaultConfigWithCustomBackend(be)
 	server := NewServer(config)
 	return server.Start()
 }
 
-// QuickStartWithBackend starts a server with default configuration and custom backend.
-func QuickStartWithBackend(be backend.Backend) error {
+// QuickStartWithBackend starts a server with default configuration and custom Types.
+func QuickStartWithBackend(be Types.Backend) error {
 	config := DefaultConfigWithCustomBackend(be)
 	server := NewServer(config)
 	return server.Start()
 }
 
 // HealthCheck provides a simple health check endpoint.
+// Note: This is now handled by the Gin HTTP server directly
 func (s *Server) HealthCheck(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
@@ -138,6 +138,7 @@ func (s *Server) HealthCheck(w http.ResponseWriter, r *http.Request) {
 }
 
 // ReadyCheck provides a readiness check endpoint.
+// Note: This is now handled by the Gin HTTP server directly
 func (s *Server) ReadyCheck(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()

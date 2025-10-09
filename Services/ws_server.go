@@ -1,25 +1,29 @@
-package rpc
+package Services
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"log"
 	"net/http"
 	"sync"
 	"time"
 
-	"github.com/jupitermetalabs/geth-facade/backend"
+	"github.com/jupitermetalabs/geth-facade/Types"
 
 	"github.com/gorilla/websocket"
 )
 
+// WSServer provides WebSocket JSON-RPC server for real-time subscriptions
+// //future: May add connection pooling and rate limiting
+// //debugging: Includes connection and subscription logging
 type WSServer struct {
 	h   *Handlers
-	be  backend.Backend
+	be  Types.Backend
 	upg websocket.Upgrader
 }
 
-func NewWSServer(h *Handlers, be backend.Backend) *WSServer {
+func NewWSServer(h *Handlers, be Types.Backend) *WSServer {
 	return &WSServer{
 		h: h, be: be,
 		upg: websocket.Upgrader{CheckOrigin: func(*http.Request) bool { return true }},
@@ -60,17 +64,17 @@ func (s *WSServer) handleWS(w http.ResponseWriter, r *http.Request) {
 		// Log incoming WebSocket message
 		log.Printf("🔌 WS Message: %s", string(data))
 
-		var req Request
+		var req Types.Request
 		if err := json.Unmarshal(data, &req); err != nil {
 			log.Printf("❌ WS Parse Error: %v", err)
-			_ = conn.WriteJSON(RespErr(nil, -32700, "Parse error"))
+			_ = conn.WriteJSON(Types.RespErr(nil, -32700, "Parse error"))
 			continue
 		}
 
 		if req.Method == "eth_subscribe" {
 			// params: [subscriptionType, (optional) filter]
 			if len(req.Params) < 1 {
-				_ = conn.WriteJSON(RespErr(req.ID, -32602, "missing subscription type"))
+				_ = conn.WriteJSON(Types.RespErr(req.ID, -32602, "missing subscription type"))
 				continue
 			}
 			typ, _ := req.Params[0].(string)
@@ -80,15 +84,15 @@ func (s *WSServer) handleWS(w http.ResponseWriter, r *http.Request) {
 			case "newHeads":
 				ch, stop, err := s.be.SubscribeNewHeads(ctx)
 				if err != nil {
-					_ = conn.WriteJSON(RespErr(req.ID, -32000, err.Error()))
+					_ = conn.WriteJSON(Types.RespErr(req.ID, -32000, err.Error()))
 					continue
 				}
 				storeSub(subs, mu, sid, stop)
-				_ = conn.WriteJSON(RespOK(req.ID, sid))
+				_ = conn.WriteJSON(Types.RespOK(req.ID, sid))
 				go forwardBlocks(conn, sid, ch)
 
 			case "logs":
-				var q backend.FilterQuery
+				var q Types.FilterQuery
 				if len(req.Params) > 1 {
 					if qq, err := toFilterQuery(req.Params[1]); err == nil {
 						q = *qq
@@ -96,32 +100,32 @@ func (s *WSServer) handleWS(w http.ResponseWriter, r *http.Request) {
 				}
 				ch, stop, err := s.be.SubscribeLogs(ctx, &q)
 				if err != nil {
-					_ = conn.WriteJSON(RespErr(req.ID, -32000, err.Error()))
+					_ = conn.WriteJSON(Types.RespErr(req.ID, -32000, err.Error()))
 					continue
 				}
 				storeSub(subs, mu, sid, stop)
-				_ = conn.WriteJSON(RespOK(req.ID, sid))
+				_ = conn.WriteJSON(Types.RespOK(req.ID, sid))
 				go forwardLogs(conn, sid, ch)
 
 			case "newPendingTransactions":
 				ch, stop, err := s.be.SubscribePendingTxs(ctx)
 				if err != nil {
-					_ = conn.WriteJSON(RespErr(req.ID, -32000, err.Error()))
+					_ = conn.WriteJSON(Types.RespErr(req.ID, -32000, err.Error()))
 					continue
 				}
 				storeSub(subs, mu, sid, stop)
-				_ = conn.WriteJSON(RespOK(req.ID, sid))
+				_ = conn.WriteJSON(Types.RespOK(req.ID, sid))
 				go forwardPending(conn, sid, ch)
 
 			default:
-				_ = conn.WriteJSON(RespErr(req.ID, -32602, "unsupported subscription"))
+				_ = conn.WriteJSON(Types.RespErr(req.ID, -32602, "unsupported subscription"))
 			}
 			continue
 		}
 
 		if req.Method == "eth_unsubscribe" {
 			if len(req.Params) < 1 {
-				_ = conn.WriteJSON(RespErr(req.ID, -32602, "missing id"))
+				_ = conn.WriteJSON(Types.RespErr(req.ID, -32602, "missing id"))
 				continue
 			}
 			id, _ := req.Params[0].(string)
@@ -131,7 +135,7 @@ func (s *WSServer) handleWS(w http.ResponseWriter, r *http.Request) {
 				delete(subs, id)
 			}
 			mu.Unlock()
-			_ = conn.WriteJSON(RespOK(req.ID, true))
+			_ = conn.WriteJSON(Types.RespOK(req.ID, true))
 			continue
 		}
 
@@ -157,7 +161,7 @@ type subMsg struct {
 	} `json:"params"`
 }
 
-func forwardBlocks(conn *websocket.Conn, sid string, ch <-chan *backend.Block) {
+func forwardBlocks(conn *websocket.Conn, sid string, ch <-chan *Types.Block) {
 	for b := range ch {
 		msg := subMsg{Jsonrpc: "2.0", Method: "eth_subscription"}
 		msg.Params.Subscription = sid
@@ -165,19 +169,19 @@ func forwardBlocks(conn *websocket.Conn, sid string, ch <-chan *backend.Block) {
 		_ = conn.WriteJSON(msg)
 	}
 }
-func forwardLogs(conn *websocket.Conn, sid string, ch <-chan backend.Log) {
+func forwardLogs(conn *websocket.Conn, sid string, ch <-chan *Types.Log) {
 	for l := range ch {
-		msg := subMsg{Jsonrpc: "2.o", Method: "eth_subscription"}
+		msg := subMsg{Jsonrpc: "2.0", Method: "eth_subscription"}
 		msg.Params.Subscription = sid
-		msg.Params.Result = marshalLogs([]backend.Log{l})[0]
+		msg.Params.Result = marshalLogs([]*Types.Log{l})[0]
 		_ = conn.WriteJSON(msg)
 	}
 }
-func forwardPending(conn *websocket.Conn, sid string, ch <-chan string) {
+func forwardPending(conn *websocket.Conn, sid string, ch <-chan []byte) {
 	for h := range ch {
 		msg := subMsg{Jsonrpc: "2.0", Method: "eth_subscription"}
 		msg.Params.Subscription = sid
-		msg.Params.Result = h
+		msg.Params.Result = "0x" + hex.EncodeToString(h)
 		_ = conn.WriteJSON(msg)
 	}
 }

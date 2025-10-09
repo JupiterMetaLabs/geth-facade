@@ -6,8 +6,7 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/jupitermetalabs/geth-facade/pkg/jmdtgethfacade"
-	"github.com/jupitermetalabs/geth-facade/pkg/memorybackend"
+	"github.com/jupitermetalabs/geth-facade/Services"
 )
 
 func main() {
@@ -26,14 +25,14 @@ func main() {
 	}
 
 	// Create server configuration with memory backend (for testing/development)
-	config := jmdtgethfacade.Config{
-		Backend:  memorybackend.NewMemoryBackend(chainID),
+	config := Services.Config{
+		Backend:  Services.NewMemoryBackend(chainID),
 		HTTPAddr: *httpAddrFlag,
 		WSAddr:   *wsAddrFlag,
 	}
 
 	// Create and start server
-	server := jmdtgethfacade.NewServer(config)
+	server := Services.NewServer(config)
 
 	log.Printf("Starting JMDT Geth Facade server...")
 	log.Printf("Chain ID: %s", chainID.String())

@@ -1,4 +1,4 @@
-package rpc
+package Types
 
 type Request struct {
 	Jsonrpc string        `json:"jsonrpc"`
